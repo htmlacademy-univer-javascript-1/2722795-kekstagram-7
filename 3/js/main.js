@@ -91,18 +91,21 @@ const createComment = () => ({
   name: getRandomArrayElement(NAMES),
 });
 
-const createPhoto = (index) => ({
-  id: index,
-  url: `photos/${index}.jpg`,
-  description: getRandomArrayElement(DESCRIPTIONS),
-  likes: getRandomInteger(Likes.MIN, Likes.MAX),
-  comments: Array.from(
-    { length: getRandomInteger(Comments.MIN, Comments.MAX) },
-    createComment
-  ),
-});
+const createPhoto = (_, index) => {
+  const id = index + 1;
 
-const createPhotos = () =>
-  Array.from({ length: PHOTOS_COUNT }, (_, index) => createPhoto(index + 1));
+  return {
+    id,
+    url: `photos/${id}.jpg`,
+    description: getRandomArrayElement(DESCRIPTIONS),
+    likes: getRandomInteger(Likes.MIN, Likes.MAX),
+    comments: Array.from(
+      { length: getRandomInteger(Comments.MIN, Comments.MAX) },
+      createComment
+    ),
+  };
+};
+
+const createPhotos = () => Array.from({ length: PHOTOS_COUNT }, createPhoto);
 
 createPhotos();
