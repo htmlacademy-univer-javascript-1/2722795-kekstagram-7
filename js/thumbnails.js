@@ -1,9 +1,12 @@
+import { openBigPicture } from './big-picture.js';
+
 const picturesContainer = document.querySelector('.pictures');
 const pictureTemplate = document.querySelector('#picture')
   .content
   .querySelector('.picture');
 
-const createThumbnail = ({ url, description, likes, comments }) => {
+const createThumbnail = (photo) => {
+  const { url, description, likes, comments } = photo;
   const thumbnail = pictureTemplate.cloneNode(true);
   const image = thumbnail.querySelector('.picture__img');
 
@@ -11,6 +14,11 @@ const createThumbnail = ({ url, description, likes, comments }) => {
   image.alt = description;
   thumbnail.querySelector('.picture__likes').textContent = likes;
   thumbnail.querySelector('.picture__comments').textContent = comments.length;
+
+  thumbnail.addEventListener('click', (evt) => {
+    evt.preventDefault();
+    openBigPicture(photo);
+  });
 
   return thumbnail;
 };
