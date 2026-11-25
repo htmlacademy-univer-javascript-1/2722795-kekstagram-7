@@ -1,5 +1,8 @@
-import { createPhotos } from './data.js';
+import { getData } from './api.js';
+import { showDataError } from './messages.js';
 import { renderThumbnails } from './thumbnails.js';
 import './form.js';
 
-renderThumbnails(createPhotos());
+getData()
+  .then(renderThumbnails)
+  .catch(showDataError);

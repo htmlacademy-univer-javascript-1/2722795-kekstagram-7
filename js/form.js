@@ -1,3 +1,5 @@
+import { sendData } from './api.js';
+import { showUploadMessage } from './messages.js';
 import { isEscapeKey } from './util.js';
 import { resetScale } from './scale.js';
 import { resetEffects } from './effects.js';
@@ -16,7 +18,7 @@ const ErrorText = {
 const form = document.querySelector('.img-upload__form');
 const fileInput = form.querySelector('.img-upload__input');
 const overlay = form.querySelector('.img-upload__overlay');
-const cancelButton = form.querySelector('.img-upload__cancel');
+const submitButton = form.querySelector('.img-upload__submit');
 const hashtagsInput = form.querySelector('.text__hashtags');
 const commentInput = form.querySelector('.text__description');
 
@@ -51,7 +53,7 @@ pristine.addValidator(commentInput, isCommentValid, ErrorText.COMMENT_LENGTH);
 const onDocumentKeydown = (evt) => {
   if (isEscapeKey(evt)) {
     evt.preventDefault();
-    closeUploadForm();
+    form.reset();
   }
 };
 
@@ -67,15 +69,27 @@ const onFileInputChange = () => {
   }
 };
 
-const onCancelButtonClick = (evt) => {
+const onFormSubmit = async (evt) => {
   evt.preventDefault();
-  closeUploadForm();
-};
 
-const onFormSubmit = (evt) => {
-  if (!pristine.validate()) {
-    evt.preventDefault();
+  if (submitButton.disabled || !pristine.validate()) {
+    return;
   }
+
+  const formData = new FormData(form);
+  submitButton.disabled = true;
+
+  try {
+    await sendData(formData);
+  } catch (error) {
+    showUploadMessage('error');
+    return;
+  } finally {
+    submitButton.disabled = false;
+  }
+
+  form.reset();
+  showUploadMessage('success');
 };
 
 function openUploadForm() {
@@ -85,21 +99,24 @@ function openUploadForm() {
   document.addEventListener('keydown', onDocumentKeydown);
 }
 
-function closeUploadForm() {
+const onFormReset = (evt) => {
+  if (submitButton.disabled) {
+    evt.preventDefault();
+    return;
+  }
+
   overlay.classList.add('hidden');
   document.body.classList.remove('modal-open');
 
   document.removeEventListener('keydown', onDocumentKeydown);
 
-  form.reset();
-  fileInput.value = '';
   resetScale();
   resetEffects();
   pristine.reset();
-}
+};
 
 fileInput.addEventListener('change', onFileInputChange);
-cancelButton.addEventListener('click', onCancelButtonClick);
 form.addEventListener('submit', onFormSubmit);
+form.addEventListener('reset', onFormReset);
 hashtagsInput.addEventListener('keydown', onTextFieldKeydown);
 commentInput.addEventListener('keydown', onTextFieldKeydown);
